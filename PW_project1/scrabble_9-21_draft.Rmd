@@ -1,0 +1,75 @@
+---
+title: "Perry Wasdin Project 1"
+output:
+  html_notebook: default
+  PW_project1_SCRABBLE.html: default
+---
+
+
+#### This notebook imputes the scRNA-seq data which is loaded in using the Python notebook in the repository
+
+### Loading Data
+```{r, message = FALSE, warning = FALSE, echo = FALSE, output = FALSE}
+# Uncomment to install packages
+
+#install.packages("devtools", dependencies = TRUE)
+#install_github("software-github/SCRABBLE/R")
+
+# Libraries
+library(devtools)
+library(SCRABBLE)
+library(SeuratDisk)
+library(dplyr)
+
+```
+## Byers CDX Data
+There are multiple samples of single cell and bulk RNA-seq, but here I am using SC39, which is from a treatment naive, sensitive tumor. There are 3 replicates of this tumor, which I will concatenate and bacth correct for my real research. Here, I will only use the first replicate (bulk: SC39.739_flank, sc: SC39_LB17) to reduce file size and computational time.
+
+Data downloaded from the GEO accession https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM4107774.
+
+
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+
+# Loading Data
+sc_df <- read.csv(file='Data/sc_tpm.csv')
+bulk_df <- read.csv(file='Data/bulk_input_df.csv')
+
+# Had to manipulate my dataframes a little bit
+colnames(bulk_df) <- c('gene','exp')
+sc_df = t(sc_df)
+
+gene_names = row.names(sc_df)
+gene_names[c(2, length(gene_names))]
+cell_names = sc_df[1,]
+
+sc_df = sc_df[-1,]
+colnames(sc_df) <- c(cell_names)
+
+# Need inputs as a matrix and vector of doubles
+sc_matrix <- (data.matrix(sc_df, rownames.force = TRUE))
+bulk_vector <- as.double(as.matrix(bulk_df$exp)) 
+```
+It appears that some of the genes in the sc data were not found in bulk, I think this is
+because I loaded the sc data using Scanpy, which adds unique tags to the gene names when
+concatenating files.
+
+I'm going to just remove these from the sc data by reverse filtering and hope none of my genes of interest are affected. If this becomes a problem, I should be able to locate gene names containing dashes, then combine them into a single row.
+
+```{r}
+data <- list(sc_matrix, bulk_vector)
+
+# These parameters are recommended by the authors, but the paper shows that the algorithm
+# is pretty robust to these input parameters
+parameter <- c(1,1e-6,1e-4)
+
+# Running SCRABBLE, this took my computer ~3 minutes 
+results <- scrabble(data, parameter)
+row.names(results) <- gene_names
+colnames(results) <- cell_names
+
+write.csv(results, 'Data/scrabble_output.csv')
+```
+
+
+
