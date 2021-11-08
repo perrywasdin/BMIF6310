@@ -1,0 +1,16 @@
+,condition,type
+SC4.435_flank,sensitive,paired-end
+SC4.613_flank,sensitive,paired-end
+SC4.616_flank,sensitive,paired-end
+SC4.917_flank,sensitive,paired-end
+SC4.918_flank,sensitive,paired-end
+SC4.920_flank,sensitive,paired-end
+SC39.739_flank,sensitive,paired-end
+SC39.963_flank,sensitive,paired-end
+SC39.964_flank,sensitive,paired-end
+SC16.A1465,resistant,paired-end
+SC16.A1466,resistant,paired-end
+SC16.A1467,resistant,paired-end
+SC49.A1428,resistant,paired-end
+SC49.A1430,resistant,paired-end
+SC49.A1431,resistant,paired-end
